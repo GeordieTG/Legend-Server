@@ -1,0 +1,25 @@
+{
+  "name": "legend-server-graphql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@pothos/core": "^3.38.0",
+    "graphql": "^16.8.1",
+    "graphql-yoga": "^4.0.5",
+    "postgres": "^3.4.0"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^20.8.6",
+    "tsx": "^3.13.0",
+    "typescript": "^5.2.2"
+  }
+}
