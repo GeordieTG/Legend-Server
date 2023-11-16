@@ -13,7 +13,20 @@ builder.objectType(UserType, {
   description: 'A user of the legend application',
   fields: (t) => ({
     email: t.exposeString('email'),
-    name: t.exposeString('name')
+    name: t.exposeString('name'),
+    leagues: t.field({
+      type: [LeagueType],
+      resolve: async (user) => {
+        const dbRegistration: Array<any> = await sql`SELECT * FROM "league_registration" WHERE user_id = ${user.email}`
+                
+        const leagues: Array<any> = await Promise.all(dbRegistration.map( async (registration) => {
+          const dbLeague = await sql`SELECT * FROM "league" WHERE id = ${registration.league_id}`
+          return dbLeague[0]
+        }))
+
+        return leagues as League[];
+      }
+    })
   }),
 });
 
@@ -32,7 +45,6 @@ builder.objectType(LeagueType, {
   }),
 });
 
-// Query
 builder.queryType({
   fields: (t) => ({
     user: t.field({
@@ -49,12 +61,7 @@ builder.queryType({
     leagues: t.field({
       type: [LeagueType],
       resolve: async () => {
-        const leagueData = await sql`SELECT * FROM "league"`;
-        const leagues = leagueData.map(row => ({
-          name: row.name,
-          city: row.city,
-          owner_id: row.owner_id
-        }));
+        const leagues: Array<any> = await sql`SELECT * FROM "league"`;
         return leagues as League[];
       },
     }),
