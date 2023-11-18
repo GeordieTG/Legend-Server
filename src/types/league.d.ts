@@ -1,5 +1,6 @@
 type League = {
     name: string,
     owner_id: number,
-    city: string
+    city: string,
+    size: number
 }

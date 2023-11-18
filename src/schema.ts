@@ -35,6 +35,7 @@ builder.objectType(LeagueType, {
   fields: (t) => ({
     name: t.exposeString('name'),
     city: t.exposeString('city'),
+    size: t.exposeInt('size'),
     owner: t.field({
       type: UserType,
       resolve: async (league) => {
@@ -83,6 +84,22 @@ builder.mutationType({
             INSERT INTO "user" (token, email, name)
             VALUES (${args.token}, ${args.email}, ${args.name})
             ON CONFLICT (email) DO UPDATE SET token = EXCLUDED.token
+          `;
+        return true;
+      },
+    }),
+    createLeague: t.boolean({
+      args: {
+        name: t.arg.string(),
+        location: t.arg.string(),
+        size: t.arg.int(),
+        owner_id: t.arg.string()
+      },
+      resolve: async (_, args: any) => {
+
+        const result = await sql`
+            INSERT INTO "league" (name, city, size, owner_id)
+            VALUES (${args.name}, ${args.location}, ${args.size}, ${args.owner_id})
           `;
         return true;
       },
