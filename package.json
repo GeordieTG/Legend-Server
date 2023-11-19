@@ -14,11 +14,13 @@
     "@pothos/core": "^3.38.0",
     "graphql": "^16.8.1",
     "graphql-yoga": "^4.0.5",
-    "postgres": "^3.4.0"
+    "postgres": "^3.4.0",
+    "socket.io": "^4.7.2"
   },
   "type": "module",
   "devDependencies": {
     "@types/node": "^20.8.6",
+    "@types/ws": "^8.5.9",
     "tsx": "^3.13.0",
     "typescript": "^5.2.2"
   }

@@ -8,6 +8,7 @@ const builder = new SchemaBuilder({});
 
 const UserType = builder.objectRef<User>('UserType');
 const LeagueType = builder.objectRef<League>('LeagueType');
+const MessageType = builder.objectRef<Message>('MessageType');
 
 builder.objectType(UserType, {
   description: 'A user of the legend application',
@@ -30,9 +31,20 @@ builder.objectType(UserType, {
   }),
 });
 
+builder.objectType(MessageType, {
+  description: 'A message within a leagues chat',
+  fields: (t) => ({
+    text: t.exposeString('text'),
+    name: t.exposeString('name'),
+    time: t.exposeString('time'),
+    room: t.exposeString('room')
+  }),
+});
+
 builder.objectType(LeagueType, {
   description: 'A league of users that compete within an organisation',
   fields: (t) => ({
+    id: t.exposeString("id"),
     name: t.exposeString('name'),
     city: t.exposeString('city'),
     size: t.exposeInt('size'),
@@ -59,11 +71,32 @@ builder.queryType({
         return returnUserDB;
       },
     }),
+    league: t.field({
+      type: LeagueType,
+      args: {
+        id: t.arg.string(),
+      },
+      resolve: async (_, args: any) => {
+        const leagueData = await sql`SELECT * FROM "league" WHERE id = ${args.id}`;
+        let returnLeagueDB: League = leagueData[0] as League; 
+        return returnLeagueDB;
+      },
+    }),
     leagues: t.field({
       type: [LeagueType],
       resolve: async () => {
         const leagues: Array<any> = await sql`SELECT * FROM "league"`;
         return leagues as League[];
+      },
+    }),
+    messages: t.field({
+      type: [MessageType],
+      args: {
+        room: t.arg.string()
+      },
+      resolve: async (_, args:any) => {
+        const messages: Array<any> = await sql`SELECT * FROM "message" where room=${args.room}`;
+        return messages as Message[];
       },
     }),
   }),
@@ -91,16 +124,27 @@ builder.mutationType({
     createLeague: t.boolean({
       args: {
         name: t.arg.string(),
-        location: t.arg.string(),
+        city: t.arg.string(),
         size: t.arg.int(),
         owner_id: t.arg.string()
       },
       resolve: async (_, args: any) => {
 
-        const result = await sql`
-            INSERT INTO "league" (name, city, size, owner_id)
-            VALUES (${args.name}, ${args.location}, ${args.size}, ${args.owner_id})
-          `;
+        await sql.begin(async (sql) => {
+
+          // Create League
+          const league = await sql`
+              INSERT INTO "league" (name, city, size, owner_id)
+              VALUES (${args.name}, ${args.city}, ${args.size}, ${args.owner_id})
+              RETURNING id
+            `          
+          // Register User to the League
+          await sql`
+          INSERT INTO "league_registration" (league_id, user_id)
+          VALUES (${league[0].id}, ${args.owner_id})
+          `
+        });
+
         return true;
       },
     }),
