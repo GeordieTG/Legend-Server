@@ -48,6 +48,16 @@ builder.objectType(LeagueType, {
     name: t.exposeString('name'),
     city: t.exposeString('city'),
     size: t.exposeInt('size'),
+    members: t.field({
+      type: [UserType],
+      resolve: async (league) => {
+        const dbRegistration: Array<any> = await sql`SELECT * FROM "league_registration" WHERE league_id = ${league.id}`
+        const members: Array<any> = await Promise.all(dbRegistration.map( async (registration) => {
+          const dbLeague = await sql`SELECT * FROM "user" WHERE email = ${registration.user_id}`
+          return dbLeague[0]
+        }))
+        return members as User[];
+    }}),
     owner: t.field({
       type: UserType,
       resolve: async (league) => {
