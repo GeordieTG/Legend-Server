@@ -1,5 +1,5 @@
 export type User = {
-    email: String
-    name: String,
+    email: string
+    name: string,
     leagues: Array<League>
   }

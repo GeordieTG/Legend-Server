@@ -48,6 +48,7 @@ builder.objectType(LeagueType, {
     name: t.exposeString('name'),
     city: t.exposeString('city'),
     size: t.exposeInt('size'),
+    image: t.exposeString("image", {nullable: true}),
     members: t.field({
       type: [UserType],
       resolve: async (league) => {
