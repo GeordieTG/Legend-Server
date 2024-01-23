@@ -13,6 +13,7 @@ const MessageType = builder.objectRef<Message>('MessageType');
 builder.objectType(UserType, {
   description: 'A user of the legend application',
   fields: (t) => ({
+    id: t.exposeInt('id'),
     email: t.exposeString('email'),
     name: t.exposeString('name'),
     leagues: t.field({
@@ -37,7 +38,15 @@ builder.objectType(MessageType, {
     text: t.exposeString('text'),
     name: t.exposeString('name'),
     time: t.exposeString('time'),
-    room: t.exposeString('room')
+    room: t.exposeString('room'),
+    user: t.field({
+      type: UserType,
+      resolve: async (message) => {
+        const dbResult = await sql`SELECT * FROM "user" WHERE id = ${message.user_id}`
+        let result = dbResult[0] as User
+        return result    
+      }
+    })
   }),
 });
 
@@ -106,7 +115,7 @@ builder.queryType({
         room: t.arg.string()
       },
       resolve: async (_, args:any) => {
-        const messages: Array<any> = await sql`SELECT * FROM "message" where room=${args.room}`;
+        const messages: Array<any> = await sql`SELECT * FROM "message" where room=${args.room} order by time asc`;
         return messages as Message[];
       },
     }),
